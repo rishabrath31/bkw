@@ -1,26 +1,31 @@
 import { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ShoppingCart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const NAV_LINKS = [
-  { name: 'Helmets', href: '#helmets' },
-  { name: 'Riding Jackets', href: '#jackets' },
-  { name: 'Spare Parts', href: '#parts' },
-  { name: 'Accessories', href: '#accessories' },
+  { name: 'Helmets', href: '/helmets' },
+  { name: 'Riding Jackets', href: '/jackets' },
+  { name: 'Spare Parts', href: '/spare-parts' },
+  { name: 'Accessories', href: '/accessories' },
+  { name: 'About', href: '/about' },
 ];
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeLink, setActiveLink] = useState('');
+  const location = useLocation();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location]);
 
   return (
     <>
@@ -31,33 +36,35 @@ export default function Navbar() {
       >
         <div className="container mx-auto px-6 md:px-12 flex justify-between items-center">
           {/* Logo */}
-          <a href="#" className="flex items-center gap-2 group">
+          <Link to="/" className="flex items-center gap-2 group">
             <span className="text-2xl font-bold tracking-tighter text-carbon-black group-hover:text-racing-red transition-colors">
               BKW<span className="text-racing-red">.</span>
             </span>
-          </a>
+          </Link>
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-8">
-            {NAV_LINKS.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                onClick={() => setActiveLink(link.name)}
-                className={`relative text-sm font-medium transition-colors hover:text-racing-red ${
-                  activeLink === link.name ? 'text-racing-red' : 'text-carbon-black'
-                }`}
-              >
-                {link.name}
-                {activeLink === link.name && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute -bottom-1 left-0 right-0 h-0.5 bg-racing-red rounded-full"
-                  />
-                )}
-              </a>
-            ))}
-            
+            {NAV_LINKS.map((link) => {
+              const isActive = location.pathname === link.href;
+              return (
+                <Link
+                  key={link.name}
+                  to={link.href}
+                  className={`relative text-sm font-medium transition-colors hover:text-racing-red ${
+                    isActive ? 'text-racing-red' : 'text-carbon-black'
+                  }`}
+                >
+                  {link.name}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeTab"
+                      className="absolute -bottom-1 left-0 right-0 h-0.5 bg-racing-red rounded-full"
+                    />
+                  )}
+                </Link>
+              );
+            })}
+
             <button className="flex items-center gap-2 bg-carbon-black text-white px-5 py-2 rounded-full hover:bg-racing-red transition-colors text-sm font-medium shadow-md">
               <ShoppingCart size={16} />
               <span>Shop</span>
@@ -101,22 +108,22 @@ export default function Navbar() {
                 <X size={28} />
               </button>
 
-              <nav className="flex flex-col gap-6 text-lg mt-8">
-                {NAV_LINKS.map((link) => (
-                  <a
-                    key={link.name}
-                    href={link.href}
-                    onClick={() => {
-                      setActiveLink(link.name);
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`font-semibold border-b border-gray-100 pb-3 transition-colors ${
-                      activeLink === link.name ? 'text-racing-red' : 'text-carbon-black hover:text-racing-red'
-                    }`}
-                  >
-                    {link.name}
-                  </a>
-                ))}
+              <nav className="flex flex-col gap-1 mt-8">
+                {NAV_LINKS.map((link) => {
+                  const isActive = location.pathname === link.href;
+                  return (
+                    <Link
+                      key={link.name}
+                      to={link.href}
+                      className={`font-semibold border-b border-gray-100 py-4 transition-colors flex items-center gap-3 ${
+                        isActive ? 'text-racing-red' : 'text-carbon-black hover:text-racing-red'
+                      }`}
+                    >
+                      {isActive && <span className="w-1.5 h-1.5 rounded-full bg-racing-red" />}
+                      {link.name}
+                    </Link>
+                  );
+                })}
               </nav>
 
               <div className="mt-auto mb-10">
